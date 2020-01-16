@@ -13,9 +13,28 @@ class EntryController {
     
     static let sharedInstance = EntryController()
     
-    var entries: [Entry] {
+    //Create variable to access our fetched results controller, exepecting an Entry
+    var fetchedResultsController: NSFetchedResultsController<Entry>
+    
+    //Create an initializer that gives our fetch results controller a value
+    init() {
+        
+        //Create a fetch request in order to fulfill the parameter requirement of the resultControllers initializer
         let fetchRequest: NSFetchRequest<Entry> = Entry.fetchRequest()
-        return (try? CoreDataStack.context.fetch(fetchRequest)) ?? []
+        
+        //Access the sort descrriptors property on our fetch request and told it we wanted our reults sorted by timestamp, descending order
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
+        
+        //Create a constant called results controller that was a NSFetchedResults controller initialized from the available initializer
+        let resultsController: NSFetchedResultsController<Entry> = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: CoreDataStack.context, sectionNameKeyPath: nil, cacheName: nil)
+        
+        fetchedResultsController = resultsController
+        
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            print("There was an error performing the fetch: \(error.localizedDescription)")
+        }
     }
     
     //CRUD
@@ -44,4 +63,4 @@ class EntryController {
             print("Error saving Managed Object. Items not saved!! \(#function) : \(error.localizedDescription)")
         }
     }
-}
+}//End of class
